@@ -79,7 +79,7 @@ const userSchema = new mongoose.Schema({
 
      delete userObject.password
      delete userObject.tokens
-     delete userObject.avatar
+    // delete userObject.avatar
      return userObject
  }
 
