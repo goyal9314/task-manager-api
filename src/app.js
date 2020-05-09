@@ -1,35 +1,38 @@
 const express = require('express')
 require('./db/mongoose')
-const User = require('./models/user')
+const body = require('body-parser')
+const path =require('path')
+const GridFsStorage = require('multer-gridfs-storage');
+const Grid = require('gridfs-stream');
+const methodOverride = require('method-override');
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const multer = require('multer');
 
-
-const Task = require('./models/task')
 const userRoute = require('./routers/user')
 const taskRoute = require('./routers/task')
-
-const bcrypt = require('bcryptjs')
-
+const patinetRoute = require('./routers/Patient')
 const app = express()
 
-
-const multer = require('multer')
-const upload = multer({
-    dest: 'images'
-})
-app.post('/upload',upload.single('upload'), (req, res) => {
-    res.send()
-})
 app.use(express.json())
+// app.use(body.json)
+// app.use(methodOverride('_method'))
+// app.set('view engine', 'ejs')
 app.use(userRoute)
 app.use(taskRoute)
+app.use(patinetRoute)
 
 //without middleware: new request -> run route handler
 //with middleware: new request -> do something -> run route handler
 
+const upload = multer({
+    dest : 'images'
+})
+app.post('/uploadfile', upload.single('file'), (req,res) =>{
+    res.send();
+})
 
 
-const Task2 = require('./models/task')
-const User2 = require('./models/user')
 // const main = async () => {
 //     //with task finding user
 //     // const task = await Task2.findById('5e7f15abe0a0ef2d3c4c5e89')

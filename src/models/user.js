@@ -3,6 +3,7 @@ const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('./task')
+const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
 
     name: {
@@ -42,6 +43,15 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+    resetPasswordToken: {
+        type: String,
+        required: false
+    },
+
+    resetPasswordExpires: {
+        type: Date,
+        required: false
+    },
     tokens: [{
         token:{
             type:String,
@@ -51,7 +61,8 @@ const userSchema = new mongoose.Schema({
     avatar:{
         type: Buffer
     }
- }, {
+ }, 
+ {
      timestamps :true
  })
 
@@ -129,5 +140,32 @@ userSchema.pre('remove', async function (next) {
     next()
     
 })
+
+userSchema.methods.comparePassword = function(password) {
+    return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.methods.generateJWT = function() {
+    const today = new Date();
+    const expirationDate = new Date(today);
+    expirationDate.setDate(today.getDate() + 60);
+
+    let payload = {
+        id: this._id,
+        email: this.email,
+        name: this.name,
+    
+    };
+
+    return jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: parseInt(expirationDate.getTime() / 1000, 10)
+    });
+};
+
+userSchema.methods.generatePasswordReset =async function() {
+    this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
+    this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
+}
+
 
 module.exports = User
